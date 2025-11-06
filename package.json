@@ -1,0 +1,20 @@
+{
+  "name": "project_group_3_recipe_sharing_platform",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ella-Connolly/Project_Group_3_Recipe_Sharing_Platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ella-Connolly/Project_Group_3_Recipe_Sharing_Platform/issues"
+  },
+  "homepage": "https://github.com/Ella-Connolly/Project_Group_3_Recipe_Sharing_Platform#readme"
+}
