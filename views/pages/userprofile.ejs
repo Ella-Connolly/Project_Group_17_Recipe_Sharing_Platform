@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | <%= user.fullName %> | Recipe Share</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <% include ../partials/navbar %>
+    <main class="container">
+        <div class="profile-card-container">
+            <article class="profile-card">
+                <h1>My Profile</h1>
+
+                <div class="avatar-placeholder"><%= user.initials %></div>
+                
+                <div class="profile-info">
+                    <div class="info-field">
+                        <label>Full Name</label>
+                        <p class="data"><%= user.fullName %></p>
+                    </div>
+
+                    <div class="info-field">
+                        <label>Email Address</label>
+                        <p class="data"><%= user.email %></p>
+                    </div>
+                    
+                    <div class="info-field">
+                        <label>Recipes Uploaded</label>
+                        <p class="data"><%= user.recipesUploaded %></p>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <a href="/profile/edit" class="btn-primary">Edit Info</a>
+                    <a href="/auth/logout" class="btn-secondary">Log Out</a>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <% include ../partials/footer %>
+</body>
+</html>
