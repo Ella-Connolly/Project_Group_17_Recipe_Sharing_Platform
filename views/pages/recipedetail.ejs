@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= recipe.title %> | Recipe Share</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <% include ../partials/navbar %>
+    <main class="container">
+        <article class="recipe-detail">
+            <h1><%= recipe.title %></h1>
+            
+            <img src="<%= /images/Apple-Pie.jfif %>" alt="">
+            
+            <div class="metadata">
+                <span>Prep Time: <%= recipe.prepTime %></span>
+                <span>Cook Time: <%= recipe.cookTime %></span>
+                <span>Servings: <%= recipe.servings %></span>
+            </div>
+
+            <section class="ingredients">
+                <h2>Ingredients</h2>
+                <div class="ingredients-list">
+                    <% recipe.ingredients.forEach(group => { %>
+                        <div class="ingredient-group">
+                            <h3><%= group.title %></h3>
+                            <ul>
+                                <% group.list.forEach(item => { %>
+                                    <li><%= item %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    <% }); %>
+                </div>
+            </section>
+
+            <section class="instructions">
+                <h2>Instructions</h2>
+                <ol>
+                    <% recipe.instructions.forEach(step => { %>
+                        <li><%= step %></li>
+                    <% }); %>
+                </ol>
+            </section>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="/save/<%= recipe.id %>" class="btn-primary">Save Recipe</a>
+            </div>
+            
+        </article>
+    </main>
+
+    <% include ../partials/footer %>
+</body>
+</html>

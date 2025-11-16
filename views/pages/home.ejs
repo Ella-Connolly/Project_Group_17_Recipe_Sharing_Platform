@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home | Recipe Share</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<% include ../partials/navbar %>
+
+<section class="hero">
+  <h1>Welcome to RecipeShare 🍽️</h1>
+  <p>Discover and share your favorite recipes!</p>
+</section>
+
+<section class="featured-section">
+  <h2 class="featured-title">Featured Recipe</h2>
+
+  <div class="recipe-card">
+    <img src="/images/Featured-Image.jfif" alt="">
+
+    <div class="recipe-info">
+      <h3>Creamy Garlic Pasta</h3>
+      <p><strong>Cook Time:</strong> 25 minutes</p>
+      <p><strong>Difficulty:</strong> Easy</p>
+      <p>A creamy, comforting pasta dish loaded with garlic flavor.</p>
+
+      <a href="/recipes/1" class="btn-view">View Recipe</a>
+    </div>
+  </div>
+</section>
+
+<% include ../partials/footer %>
+</body>
+</html>
