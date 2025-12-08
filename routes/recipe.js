@@ -113,11 +113,10 @@ router.delete("/:id", requireLogin, async (req, res) => {
 // VIEW SINGLE RECIPE
 // Must come after POST "/" to avoid conflicts
 router.get("/:id", async (req, res) => {
-  const recipeId = parseInt(req.params.id, 10);
-  if (isNaN(recipeId)) return res.status(400).send("Invalid recipe ID");
+  const recipeId = req.params.id;
 
   try {
-    const recipeResult = await db.query(
+    const result = await db.query(
       `SELECT r.*, u.username AS author_username
        FROM recipes r
        LEFT JOIN users u ON r.author_id = u.id
@@ -125,18 +124,25 @@ router.get("/:id", async (req, res) => {
       [recipeId]
     );
 
-    if (!recipeResult.rows.length) return res.status(404).send("Recipe not found");
+    if (result.rows.length === 0) {
+      return res.status(404).send("Recipe not found");
+    }
 
-    const recipe = recipeResult.rows[0];
+    const recipe = result.rows[0];
 
-    // Convert strings to arrays
+    // Ensure ingredients + instructions are arrays
     if (typeof recipe.ingredients === "string") {
       recipe.ingredients = recipe.ingredients.split(",").map(i => i.trim());
     }
+
     if (typeof recipe.instructions === "string") {
-      recipe.instructions = recipe.instructions.split(".").map(i => i.trim()).filter(Boolean);
+      recipe.instructions = recipe.instructions
+        .split(".")
+        .map(i => i.trim())
+        .filter(Boolean);
     }
 
+    // Load comments
     const commentsResult = await db.query(
       `SELECT c.*, u.username AS commenter_username
        FROM comments c
@@ -146,13 +152,15 @@ router.get("/:id", async (req, res) => {
       [recipeId]
     );
 
+    // Render recipedetail.ejs and PASS ONLY { recipe, comments }
     res.render("pages/recipedetail", {
-      recipe,
-      comments: commentsResult.rows,
+      recipe: recipe,
+      comments: commentsResult.rows
     });
+
   } catch (err) {
-    console.error("Error fetching recipe:", err);
-    res.status(500).send("Database error");
+    console.error("Error loading recipe:", err);
+    res.status(500).send("Server Error");
   }
 });
 
