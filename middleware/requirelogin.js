@@ -3,6 +3,6 @@ module.exports = function requireLogin(req, res, next) {
     return next();
   } else {
     if (req.flash) req.flash("error", "You must be logged in.");
-    return res.redirect("/auth/login");
+    return res.redirect("/login");
   }
 };

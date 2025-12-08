@@ -12,9 +12,8 @@ const app = express();
 //import routes
 const authRouter = require("./routes/auth");
 const commentRouter = require("./routes/comments");
-const recipeApi = require("./routes/recipe");
+const recipeRouter = require("./routes/recipe"); // updated name for clarity
 const uploadApi = require("./routes/upload");
-const authRoutes = require("./routes/auth");
 const webIndex = require("./routes/index");
 
 //port
@@ -57,12 +56,12 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 //routes
-app.use("/auth", authRouter);
-app.use("/api/recipes", recipeApi);
-app.use("/api/upload", uploadApi);
-app.use("/comments", commentRouter);
-app.use("/", webIndex);
+app.use("/", webIndex);          // homepage
+app.use("/", authRouter);        // login/signup/logout
+app.use("/recipes", recipeRouter);  // all recipe routes, including /view/:id
+app.use("/api/upload", uploadApi);  // file uploads
+app.use("/comments", commentRouter); // comment actions
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${5000}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

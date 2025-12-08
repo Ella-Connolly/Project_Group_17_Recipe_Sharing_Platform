@@ -26,6 +26,9 @@
       <% if (recipe.cuisine) { %>
         <span>Cuisine: <%= recipe.cuisine %></span>
       <% } %>
+      <% if (recipe.author_username) { %>
+        <span>Author: <%= recipe.author_username %></span>
+      <% } %>
     </div>
 
     <section class="ingredients">
@@ -79,7 +82,7 @@
           <% comments.forEach(c => { %>
             <div class="comment">
               <div class="comment-meta">
-                <strong><%= c.username || 'Guest' %></strong>
+                <strong><%= c.commenter_username || 'Guest' %></strong>
                 <span class="time"><%= new Date(c.created_at).toLocaleString() %></span>
               </div>
               <div class="comment-body"><%= c.content %></div>

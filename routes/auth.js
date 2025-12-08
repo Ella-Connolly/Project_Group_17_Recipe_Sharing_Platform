@@ -15,7 +15,8 @@ function createUserSession(req, user) {
 
 //get signup page
 router.get("/signup", (req, res) => {
-  res.render("signup", { flash: req.flash ? req.flash() : {} });
+  // TESTING HEREEEEEE
+  res.render("pages/signup", { flash: req.flash ? req.flash() : {} });
 });
 
 //post signup
@@ -24,7 +25,8 @@ router.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
       req.flash("error", "All fields are required.");
-      return res.redirect("/auth/signup");
+// TESTING HEREEEEEE     
+      return res.redirect("/signup");
     }
 
     const exists = await db.query(
@@ -33,7 +35,8 @@ router.post("/signup", async (req, res) => {
     );
     if (exists.rows.length) {
       req.flash("error", "Username or email already taken.");
-      return res.redirect("/auth/signup");
+// TESTING HEREEEEEE    
+      return res.redirect("/signup");
     }
 
     const hash = await bcrypt.hash(password, saltRounds);
@@ -49,13 +52,15 @@ router.post("/signup", async (req, res) => {
   } catch (err) {
     console.error("Signup error:", err);
     req.flash("error", "Server error.");
-    return res.redirect("/auth/signup");
+// TESTING HEREEEEEE    
+    return res.redirect("/signup");
   }
 });
 
 //get login page
 router.get("/login", (req, res) => {
-  res.render("login", { flash: req.flash ? req.flash() : {} });
+  // TESTING HEREEEEEE
+  res.render("pages/login", { flash: req.flash ? req.flash() : {} });
 });
 
 //post login
@@ -64,7 +69,8 @@ router.post("/login", async (req, res) => {
     const { emailOrUsername, password } = req.body;
     if (!emailOrUsername || !password) {
       req.flash("error", "All fields are required.");
-      return res.redirect("/auth/login");
+// TESTING HEREEEEEE
+      return res.redirect("/login");
     }
 
     const result = await db.query(
@@ -76,14 +82,16 @@ router.post("/login", async (req, res) => {
 
     if (result.rows.length === 0) {
       req.flash("error", "Invalid credentials.");
-      return res.redirect("/auth/login");
+// TESTING HEREEEEEE
+      return res.redirect("login");
     }
 
     const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       req.flash("error", "Invalid credentials.");
-      return res.redirect("/auth/login");
+// TESTING HEREEEEEE
+      return res.redirect("/login");
     }
 
     createUserSession(req, user);
@@ -91,7 +99,8 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     req.flash("error", "Server error.");
-    return res.redirect("/auth/login");
+// TESTING HEREEEEEE
+    return res.redirect("/login");
   }
 });
 

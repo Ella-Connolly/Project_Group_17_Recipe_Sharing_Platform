@@ -18,22 +18,23 @@
   <section class="featured-section">
     <h2 class="featured-title">Featured Recipes</h2>
     <div class="recipes-container">
-      <% if (featured && featured.length > 0) { %>
-        <% featured.forEach(recipe => { %>
-          <div class="recipe-card">
-            <img src="<%= recipe.images && recipe.images[0] ? recipe.images[0] : '/images/Featured-Image.jfif' %>" alt="<%= recipe.title %>">
-            <div class="recipe-info">
-              <h3><%= recipe.title %></h3>
-              <p><strong>Cook Time:</strong> <%= recipe.cook_time || 'N/A' %> minutes</p>
-              <p><%= recipe.description || 'No description available.' %></p>
-              <a href="/recipes/<%= recipe.id %>" class="btn-view">View Recipe</a>
-            </div>
-          </div>
-        <% }) %>
-      <% } else { %>
-        <p>No featured recipes available.</p>
-      <% } %>
-    </div>
+  <% if (featured && featured.length > 0) { %>
+    <% featured.forEach(recipe => { %>
+      <div class="recipe-card">
+        <img src="<%= recipe.images && recipe.images[0] ? recipe.images[0] : '/images/Featured-Image.jfif' %>" alt="<%= recipe.title %>">
+        <div class="recipe-info">
+          <h3><%= recipe.title %></h3>
+          <p><strong>Cook Time:</strong> <%= recipe.cook_time || 'N/A' %> minutes</p>
+          <p><%= recipe.description || 'No description available.' %></p>
+          <a href="/recipes/<%= recipe.id %>" class="btn-view">View Recipe</a>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>No featured recipes available.</p>
+  <% } %>
+</div>
+
   </section>
 
   <%- include("../partials/footer.ejs") %>

@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require("../db");
 const requireLogin = require("../middleware/requireLogin");
 
-//get all recipes
+// LIST / FILTER RECIPES
 router.get("/", async (req, res) => {
   const { cuisine, ingredient, keyword } = req.query;
 
@@ -29,26 +29,94 @@ router.get("/", async (req, res) => {
 
   try {
     const result = await db.query(query, params);
-    res.json(result.rows);
+    res.render("pages/recipes", {
+      recipes: result.rows,
+      flash: req.flash ? req.flash() : {},
+      currentUser: req.session.user || null,
+    });
   } catch (err) {
     console.error("Recipe filter error:", err);
+    req.flash("error", "Could not load recipes.");
+    res.redirect("/");
+  }
+});
+
+// POST NEW RECIPE
+router.post("/", requireLogin, async (req, res) => {
+  let {
+    title, description, ingredients, instructions, tags,
+    cuisine, difficulty, cook_time, prep_time, servings, images
+  } = req.body;
+
+  // Convert comma-separated strings into arrays for storage
+  ingredients = ingredients ? ingredients.split(",").map(i => i.trim()) : [];
+  instructions = instructions ? instructions.split(".").map(i => i.trim()).filter(Boolean) : [];
+  tags = tags ? tags.split(",").map(t => t.trim()) : [];
+  images = images ? [images.trim()] : []; // wrap single image URL in array
+
+  try {
+    const result = await db.query(
+      `INSERT INTO recipes
+      (title, description, ingredients, instructions, tags, cuisine, difficulty, cook_time, prep_time, servings, images, author_id)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+      RETURNING *`,
+      [
+        title,
+        description || "",
+        ingredients,
+        instructions,
+        tags,
+        cuisine || "",
+        difficulty || "",
+        cook_time || 0,
+        prep_time || 0,
+        servings || 1,
+        images,
+        req.session.user.id
+      ]
+    );
+
+    // Redirect to newly created recipe page instead of JSON
+    const newRecipe = result.rows[0];
+    res.redirect(`/recipes/${newRecipe.id}`);
+  } catch (err) {
+    console.error("Recipe post error:", err);
+    req.flash("error", "Could not submit recipe. Please try again.");
+    res.redirect("/recipes/submit");
+  }
+});
+
+router.get("/submit", requireLogin, (req, res) => {
+  res.render("pages/submit"); // this loads views/submit.ejs
+});
+
+
+// DELETE RECIPE BY ID
+router.delete("/:id", requireLogin, async (req, res) => {
+  const recipeId = req.params.id;
+  const userId = req.session.user.id;
+
+  try {
+    const check = await db.query("SELECT author_id FROM recipes WHERE id = $1", [recipeId]);
+
+    if (!check.rows.length) return res.status(404).json({ error: "Recipe not found" });
+    if (check.rows[0].author_id !== userId) return res.status(403).json({ error: "Not allowed" });
+
+    await db.query("DELETE FROM recipes WHERE id = $1", [recipeId]);
+    res.json({ message: "Recipe deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
     res.status(500).json({ error: "Database error" });
   }
 });
 
-// Render the recipe submission page
-router.get("/submit", requireLogin, (req, res) => {
-  res.render("submit"); // this loads views/submit.ejs
-});
-
-
-//fetch a single recipe based on ID from database
+// VIEW SINGLE RECIPE
+// Must come after POST "/" to avoid conflicts
 router.get("/:id", async (req, res) => {
   const recipeId = parseInt(req.params.id, 10);
-  if (isNaN(recipeId)) return res.status(400).json({ error: "Invalid recipe ID" });
+  if (isNaN(recipeId)) return res.status(400).send("Invalid recipe ID");
 
   try {
-    //username
     const recipeResult = await db.query(
       `SELECT r.*, u.username AS author_username
        FROM recipes r
@@ -57,9 +125,18 @@ router.get("/:id", async (req, res) => {
       [recipeId]
     );
 
-    if (!recipeResult.rows.length) return res.status(404).json({ error: "Recipe not found" });
+    if (!recipeResult.rows.length) return res.status(404).send("Recipe not found");
 
-    //get comments
+    const recipe = recipeResult.rows[0];
+
+    // Convert strings to arrays
+    if (typeof recipe.ingredients === "string") {
+      recipe.ingredients = recipe.ingredients.split(",").map(i => i.trim());
+    }
+    if (typeof recipe.instructions === "string") {
+      recipe.instructions = recipe.instructions.split(".").map(i => i.trim()).filter(Boolean);
+    }
+
     const commentsResult = await db.query(
       `SELECT c.*, u.username AS commenter_username
        FROM comments c
@@ -69,84 +146,13 @@ router.get("/:id", async (req, res) => {
       [recipeId]
     );
 
-    res.json({
-      recipe: recipeResult.rows[0],
+    res.render("pages/recipedetail", {
+      recipe,
       comments: commentsResult.rows,
     });
   } catch (err) {
     console.error("Error fetching recipe:", err);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
-//post recipe
-router.post("/", requireLogin, async (req, res) => {
-  const {
-    title,
-    description,
-    ingredients,
-    instructions,
-    tags,
-    cuisine,
-    difficulty,
-    cook_time,
-    prep_time,
-    servings,
-    images
-  } = req.body;
-
-  try {
-    const result = await db.query(
-      `INSERT INTO recipes
-        (title, description, ingredients, instructions, tags, cuisine, difficulty, cook_time, prep_time, servings, images, author_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-       RETURNING *`,
-      [
-        title,
-        description || "",
-        ingredients || [],
-        instructions || [],
-        tags || [],
-        cuisine || "",
-        difficulty || "",
-        cook_time || 0,
-        prep_time || 0,
-        servings || 1,
-        images || [],
-        req.session.user.id
-      ]
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error("Recipe post error:", err);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
-//delete recipe by ID
-router.delete("/:id", requireLogin, async (req, res) => {
-  const recipeId = req.params.id;
-  const userId = req.session.user.id;
-
-  try {
-    const check = await db.query(
-      "SELECT author_id FROM recipes WHERE id = $1",
-      [recipeId]
-    );
-
-    if (!check.rows.length)
-      return res.status(404).json({ error: "Recipe not found" });
-
-    if (check.rows[0].author_id !== userId)
-      return res.status(403).json({ error: "Not allowed" });
-
-    await db.query("DELETE FROM recipes WHERE id = $1", [recipeId]);
-
-    res.json({ message: "Recipe deleted successfully" });
-  } catch (err) {
-    console.error("Delete error:", err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).send("Database error");
   }
 });
 
